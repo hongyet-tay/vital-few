@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vital Few — find the 20% that matters</title>
+<meta name="description" content="Find the 20% of tasks, questions and issues that drive 80% of your mission.">
+<meta name="theme-color" content="#16213A">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Vital Few">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#16213A; --ink-2:#4A5570; --ink-3:#8791A6;
+  --paper:#EEF1F5; --card:#FFFFFF; --line:#D9DEE7;
+  --hi:#F5C518; --hi-soft:#FFF3C2; --hi-ink:#5A4300;
+  --q:#3D5AFE; --q-soft:#E6EAFF; --x:#D6453D; --x-soft:#FCE7E5;
+  --done:#2E8B57;
+  --display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#E8ECF4; --ink-2:#A9B2C5; --ink-3:#6E788C;
+    --paper:#0F1522; --card:#182033; --line:#2A3449;
+    --hi:#F5C518; --hi-soft:#3A3212; --hi-ink:#FFE28A;
+    --q:#8A9BFF; --q-soft:#1F2748; --x:#FF8A80; --x-soft:#3A1E1D;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#E8ECF4; --ink-2:#A9B2C5; --ink-3:#6E788C;
+  --paper:#0F1522; --card:#182033; --line:#2A3449;
+  --hi:#F5C518; --hi-soft:#3A3212; --hi-ink:#FFE28A;
+  --q:#8A9BFF; --q-soft:#1F2748; --x:#FF8A80; --x-soft:#3A1E1D;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+body{margin:0;min-height:100%;background:var(--paper);color:var(--ink);font:16px/1.5 var(--body);-webkit-font-smoothing:antialiased}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--q);outline-offset:2px}
+.app{max-width:560px;margin:0 auto;padding:16px 16px 110px}
+h1,h2,h3{font-family:var(--display);font-weight:700;letter-spacing:-.01em;margin:0}
+.muted{color:var(--ink-2)}
+.small{font-size:14px}
+.tiny{font-size:13px;color:var(--ink-3)}
+
+/* header */
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.brand{font-family:var(--display);font-weight:700;font-size:18px;display:flex;align-items:center;gap:8px}
+.brand .mark{width:26px;height:26px;border-radius:7px;background:var(--ink);position:relative;overflow:hidden}
+.brand .mark::after{content:"";position:absolute;left:0;bottom:0;width:30%;height:100%;background:var(--hi)}
+.iconbtn{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:6px 10px;font-size:14px}
+.mission{background:var(--ink);color:var(--paper);border-radius:18px;padding:16px 18px;margin-bottom:18px}
+.mission .lbl{font-size:13px;opacity:.7}
+.mission h2{font-size:22px;line-height:1.2;margin:2px 0 6px;color:var(--paper)}
+.mission .finish{font-size:14px;opacity:.85}
+.progress{height:6px;background:rgba(255,255,255,.18);border-radius:3px;margin-top:12px;overflow:hidden}
+.progress>i{display:block;height:100%;background:var(--hi);transition:width .4s}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .mission{background:#243052;color:var(--ink)} :root:not([data-theme="light"]) .mission h2{color:var(--ink)}}
+:root[data-theme="dark"] .mission{background:#243052;color:var(--ink)}
+:root[data-theme="dark"] .mission h2{color:var(--ink)}
+
+/* tabs */
+.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;gap:6px;z-index:5}
+.tabs button{flex:1;max-width:180px;border:0;background:none;border-radius:12px;padding:8px 4px;font-size:14px;font-weight:500;color:var(--ink-2);display:flex;flex-direction:column;align-items:center;gap:2px}
+.tabs button .n{font-family:var(--display);font-size:18px}
+.tabs button[aria-current="page"]{background:var(--paper);color:var(--ink)}
+.tabs button .badge{font-size:11px;background:var(--hi);color:#3A2C00;border-radius:8px;padding:0 6px;margin-left:4px}
+
+/* forms */
+.field{display:block;margin-bottom:14px}
+.field span{display:block;font-size:14px;font-weight:500;margin-bottom:6px}
+.field input,.field textarea{width:100%;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:12px 14px;font-size:16px}
+.primary{width:100%;border:0;background:var(--ink);color:var(--paper);border-radius:14px;padding:14px;font-weight:600;font-size:16px}
+.ghost{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px 14px;font-weight:500}
+.err{color:var(--x);font-size:14px;margin:-6px 0 12px;min-height:0}
+
+/* capture */
+.capture{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;margin-bottom:14px}
+.capture form{display:flex;gap:8px}
+.capture input{flex:1;min-width:0;border:0;background:var(--paper);border-radius:12px;padding:12px 14px;font-size:16px}
+.capture .add{border:0;background:var(--ink);color:var(--paper);border-radius:12px;padding:0 16px;font-weight:600}
+.types{display:flex;gap:6px;margin-top:10px}
+.types button{border:1px solid var(--line);background:none;border-radius:999px;padding:5px 12px;font-size:14px}
+.types button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.chip{font-size:12px;font-weight:600;border-radius:6px;padding:2px 8px;white-space:nowrap;border:0}
+.chip.task{background:var(--paper);color:var(--ink-2)}
+.chip.question{background:var(--q-soft);color:var(--q)}
+.chip.issue{background:var(--x-soft);color:var(--x)}
+.list{list-style:none;margin:0;padding:0}
+.item{display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid var(--line)}
+.item .t{flex:1;min-width:0;overflow-wrap:anywhere}
+.item .del{border:0;background:none;color:var(--ink-3);font-size:20px;line-height:1;padding:4px 8px}
+.item .sc{font-size:12px;color:var(--ink-3);white-space:nowrap}
+.empty{text-align:center;padding:32px 12px;color:var(--ink-2)}
+.empty h3{font-size:20px;color:var(--ink);margin-bottom:6px}
+.ai{display:none;margin:0 0 14px}
+.ai.on{display:block}
+.sugg{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.sugg button{border:1px dashed var(--ink-3);background:var(--card);border-radius:12px;padding:8px 12px;font-size:14px;text-align:left}
+
+/* rate */
+.rcard{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px}
+.rcard .q{font-family:var(--display);font-size:22px;line-height:1.25;margin:10px 0 18px}
+.scale{margin-bottom:16px}
+.scale .h{display:flex;justify-content:space-between;font-size:14px;font-weight:500;margin-bottom:8px}
+.scale .h em{font-style:normal;color:var(--ink-3);font-weight:400}
+.dots{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.dots button{min-height:56px;border:1px solid var(--line);background:var(--paper);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 2px}
+.dots .dn{font-family:var(--display);font-size:18px;line-height:1.1}
+.dots .dl{font-size:11px;line-height:1.2;opacity:.8}
+.dots button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.dots.impact button[aria-pressed="true"]{background:var(--hi);color:#3A2C00;border-color:var(--hi)}
+.toggle{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--paper);width:100%;text-align:left}
+.toggle .box{width:22px;height:22px;border-radius:6px;border:2px solid var(--ink-3);flex:none;display:grid;place-items:center;font-size:14px}
+.toggle[aria-pressed="true"] .box{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.rnav{display:flex;gap:8px;margin-top:16px}
+.rnav .primary{flex:2}
+.rnav .ghost{flex:1}
+.rhead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.pips{display:flex;gap:4px;margin-bottom:14px}
+.pips i{flex:1;height:4px;border-radius:2px;background:var(--line)}
+.pips i.on{background:var(--ink)}
+
+/* focus */
+.verdict{margin:4px 0 12px}
+.verdict .big{font-family:var(--display);font-size:clamp(28px,8vw,40px);line-height:1.05;font-weight:700}
+.verdict .big mark{background:linear-gradient(transparent 55%,var(--hi) 55%);color:inherit;padding:0 2px}
+.chartwrap{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 10px 8px;margin-bottom:14px;overflow-x:auto}
+.chartwrap svg{display:block;min-width:100%}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--ink-2);padding:6px 6px 2px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.note{background:var(--hi-soft);color:var(--hi-ink);border-radius:12px;padding:10px 14px;font-size:14px;margin-bottom:14px}
+.vital{list-style:none;margin:0 0 18px;padding:0;display:flex;flex-direction:column;gap:8px}
+.vital li{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--hi);border-radius:0 14px 14px 0;padding:12px 12px;display:flex;gap:12px;align-items:flex-start}
+.rank{font-family:var(--display);font-weight:700;font-size:20px;min-width:22px;color:var(--ink-3)}
+.vital .body{flex:1;min-width:0}
+.vital .t{font-weight:500;overflow-wrap:anywhere}
+.vital .meta{display:flex;gap:8px;align-items:center;margin-top:4px;flex-wrap:wrap}
+.check{width:30px;height:30px;border-radius:50%;border:2px solid var(--ink-3);background:none;flex:none;display:grid;place-items:center;font-size:16px;color:transparent}
+.check:hover{border-color:var(--done);color:var(--done)}
+.why{font-size:13px;color:var(--ink-3)}
+.cumbar{position:relative;height:18px;background:var(--paper);border-radius:5px;margin-top:8px;overflow:hidden}
+.cumbar i{position:absolute;left:0;top:0;bottom:0;background:var(--hi-soft);border-right:2px solid var(--hi)}
+.cumbar span{position:relative;font-size:12px;font-weight:600;padding-left:8px;line-height:18px;color:var(--hi-ink)}
+details.rest{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px 14px;margin-bottom:12px}
+details.rest summary{padding:10px 0;font-weight:500;cursor:pointer}
+details.rest .item{opacity:.8}
+.donelist .t{text-decoration:line-through;color:var(--ink-3)}
+.sect{font-family:var(--display);font-size:18px;margin:18px 0 10px}
+
+/* sheet */
+.sheetbg{position:fixed;inset:0;background:rgba(10,15,30,.45);display:none;align-items:flex-end;justify-content:center;z-index:10}
+.sheetbg.open{display:flex}
+.sheet{background:var(--card);width:100%;max-width:560px;border-radius:22px 22px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom,0px));max-height:85vh;overflow:auto}
+.mrow{display:flex;align-items:center;gap:8px;padding:12px 0;border-bottom:1px solid var(--line)}
+.mrow button.pick{flex:1;text-align:left;border:0;background:none;padding:0}
+.mrow .cur{font-size:12px;background:var(--hi);color:#3A2C00;border-radius:6px;padding:1px 6px;margin-left:6px}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:8px 14px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20}
+.toast.on{opacity:1}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<nav class="tabs" id="tabs" aria-label="Steps"></nav>
+<div class="sheetbg" id="sheet" role="dialog" aria-modal="true" aria-label="Missions"><div class="sheet" id="sheetBody"></div></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+"use strict";
+var LS_KEY = "vitalfew.v1";
+var state = { missions: [], current: null };
+var view = "capture";
+var captureType = "task";
+var rateIndex = 0;
+var rateAll = false;
+var aiEnabled = true;
+var DEVICE_KEY = "vitalfew.device";
+
+function uid(){ return Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); }
+function esc(s){ return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+function $(id){ return document.getElementById(id); }
+function toast(msg){ var t=$("toast"); t.textContent=msg; t.classList.add("on"); clearTimeout(toast._t); toast._t=setTimeout(function(){t.classList.remove("on");},1600); }
+
+/* ---------- storage ---------- */
+function loadLocal(){
+  try{ var raw = localStorage.getItem(LS_KEY); if(raw){ var s = JSON.parse(raw); if(s && Array.isArray(s.missions)) state = s; } }catch(e){}
+}
+function save(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+  catch(e){ toast("Couldn't save on this device. Storage may be full."); }
+}
+function deviceId(){
+  try{
+    var id = localStorage.getItem(DEVICE_KEY);
+    if(!id){ id = (crypto.randomUUID ? crypto.randomUUID() : uid()+uid()); localStorage.setItem(DEVICE_KEY, id); }
+    return id;
+  }catch(e){ return "anon"; }
+}
+
+/* ---------- model ---------- */
+function mission(){ return state.missions.find(function(m){return m.id===state.current;}) || null; }
+var IMPACT_W=[0,1,2,4,8,16], EFFORT_W=[0,1,2,3,5,8];
+var IMPACT_L=["","Minor","Helps","Important","Critical","Decisive"], EFFORT_L=["","Hours","A day","Days","A week","Weeks"];
+function weight(it){ return (IMPACT_W[it.impact]||0) * (it.blocker?1.5:1); }
+function leverage(it){ return weight(it) / (EFFORT_W[it.effort]||1); }
+function isRated(it){ return it.impact>0 && it.effort>0; }
+
+function analyze(m){
+  var open = m.items.filter(function(i){return i.status!=="done";});
+  var rated = open.filter(isRated).sort(function(a,b){ return leverage(b)-leverage(a) || weight(b)-weight(a); });
+  var total = rated.reduce(function(s,i){return s+weight(i);},0);
+  var cum = 0, vitalN = 0, cumArr = [];
+  rated.forEach(function(it,idx){ cum += weight(it); cumArr.push(total? cum/total : 0); });
+  for(var k=0;k<rated.length;k++){ vitalN = k+1; if(cumArr[k] >= 0.795) break; }
+  if(!rated.length) vitalN = 0;
+  var coverage = vitalN ? cumArr[vitalN-1] : 0;
+  var allW = m.items.filter(isRated).reduce(function(s,i){return s+weight(i);},0);
+  var doneW = m.items.filter(function(i){return i.status==="done" && isRated(i);}).reduce(function(s,i){return s+weight(i);},0);
+  return { rated: rated, vital: rated.slice(0,vitalN), rest: rated.slice(vitalN), cum: cumArr, coverage: coverage,
+           unrated: open.filter(function(i){return !isRated(i);}), done: m.items.filter(function(i){return i.status==="done";}),
+           delivered: allW ? doneW/allW : 0 };
+}
+
+/* ---------- render ---------- */
+function render(){
+  var m = mission();
+  renderTabs(m);
+  var app = $("app");
+  if(!m){ app.innerHTML = header(null) + newMissionForm(true); bindNewMission(); return; }
+  var a = analyze(m);
+  var html = header(m) + missionCard(m,a);
+  if(view==="capture") html += captureView(m);
+  else if(view==="rate") html += rateView(m);
+  else html += focusView(m,a);
+  app.innerHTML = html;
+  bind(m);
+}
+
+function header(m){
+  return '<div class="top"><div class="brand"><span class="mark" aria-hidden="true"></span>Vital Few</div>' +
+    (m ? '<button class="iconbtn" id="openMissions">Missions (' + state.missions.length + ')</button>' : '') + '</div>';
+}
+function missionCard(m,a){
+  var pct = Math.round(a.delivered*100);
+  return '<section class="mission"><div class="lbl">Mission</div><h2>' + esc(m.title) + '</h2>' +
+    (m.finish ? '<div class="finish">Done when: ' + esc(m.finish) + '</div>' : '') +
+    '<div class="progress" aria-label="Impact delivered ' + pct + '%"><i style="width:' + pct + '%"></i></div>' +
+    '<div class="finish" style="margin-top:6px;font-size:13px">' + pct + '% of rated impact delivered</div></section>';
+}
+function renderTabs(m){
+  var t = $("tabs");
+  if(!m){ t.style.display="none"; return; }
+  t.style.display="flex";
+  var a = analyze(m);
+  var tabs = [["capture","1","Capture", m.items.filter(function(i){return i.status!=="done";}).length],
+              ["rate","2","Rate", a.unrated.length],
+              ["focus","3","Focus", a.vital.length]];
+  t.innerHTML = tabs.map(function(x){
+    var badge = (x[0]==="rate" && x[3]) ? '<span class="badge">'+x[3]+' new</span>' : (x[0]==="focus" && x[3] ? '<span class="badge">'+x[3]+'</span>' : '');
+    return '<button data-view="'+x[0]+'" '+(view===x[0]?'aria-current="page"':'')+'><span class="n">'+x[1]+'</span><span>'+x[2]+badge+'</span></button>';
+  }).join("");
+  t.querySelectorAll("button").forEach(function(b){ b.onclick=function(){ m.items.forEach(function(i){ delete i._editing; }); view=b.dataset.view; rateIndex=0; rateAll=false; render(); window.scrollTo(0,0); }; });
+}
+
+function newMissionForm(first){
+  return (first ? '<div class="empty" style="text-align:left;padding:8px 0 18px"><h1 style="font-size:clamp(30px,9vw,44px);line-height:1.05;margin-bottom:10px">Most of your results come from a few of your tasks.</h1><p class="muted">Name your mission, dump everything on your mind, rate each item in two taps, and see the 20% worth your attention.</p></div>' : '<h2 style="font-size:22px;margin-bottom:14px">New mission</h2>') +
+    '<form id="missionForm" novalidate>' +
+    '<label class="field"><span>What are you trying to achieve?</span><input id="mTitle" maxlength="120" placeholder="Launch MVP to 100 paying users"></label>' +
+    '<div class="err" id="mErr"></div>' +
+    '<label class="field"><span>How will you know it\'s done? <span class="tiny">(optional)</span></span><input id="mFinish" maxlength="140" placeholder="100 paid accounts by 15 Dec"></label>' +
+    '<button class="primary" type="submit">Start mission</button></form>';
+}
+function bindNewMission(){
+  var f = $("missionForm"); if(!f) return;
+  $("mTitle").oninput = function(){ $("mErr").textContent=""; };
+  f.onsubmit = function(e){
+    e.preventDefault();
+    var title = $("mTitle").value.trim();
+    if(!title){ $("mErr").textContent = "Enter a mission first."; $("mTitle").focus(); return; }
+    var m = { id: uid(), title: title, finish: $("mFinish").value.trim(), items: [], created: Date.now() };
+    state.missions.push(m); state.current = m.id; view="capture"; save(); closeSheet(); render();
+    setTimeout(function(){ var i=$("capIn"); if(i) i.focus(); }, 50);
+  };
+}
+
+/* capture */
+function captureView(m){
+  var open = m.items.filter(function(i){return i.status!=="done";});
+  var h = '<section class="capture"><form id="capForm"><label class="sr" for="capIn">New item</label>' +
+    '<input id="capIn" autocomplete="off" maxlength="160" placeholder="' + ({task:"Build payment flow",question:"What price will users pay?",issue:"No onboarding email yet"})[captureType] + '">' +
+    '<button class="add" type="submit" aria-label="Add item">Add</button></form>' +
+    '<div class="err" id="capErr" style="margin:6px 0 0"></div>' +
+    '<div class="types" role="group" aria-label="Item type">' +
+    ["task","question","issue"].map(function(t){return '<button type="button" data-type="'+t+'" aria-pressed="'+(captureType===t)+'">'+t.charAt(0).toUpperCase()+t.slice(1)+'</button>';}).join("") +
+    '</div></section>';
+  h += '<div class="ai' + (aiEnabled ? ' on' : '') + '"><button class="ghost" id="aiBtn" style="width:100%">Suggest items I might be missing</button><div class="sugg" id="sugg"></div></div>';
+  if(!open.length){
+    h += '<div class="empty"><h3>Empty your head</h3><p>Add every task, open question and issue you can think of. Don\'t judge them yet. Rating comes next.</p></div>';
+  } else {
+    h += '<p class="tiny" style="margin:0 0 4px">' + open.length + ' items. Tap a label to change its type.</p><ul class="list">' + open.slice().reverse().map(function(it){
+      return '<li class="item"><button class="chip '+it.type+'" data-cycle="'+it.id+'" aria-label="Change type, now '+it.type+'">'+it.type+'</button><span class="t">'+esc(it.text)+'</span>' +
+        (isRated(it) ? '<span class="sc">'+IMPACT_L[it.impact]+(it.blocker?' · blocks':'')+'</span>' : '<span class="sc">unrated</span>') +
+        '<button class="del" data-del="'+it.id+'" aria-label="Delete">×</button></li>';
+    }).join("") + '</ul>';
+    var unr = open.filter(function(i){return !isRated(i);}).length;
+    if(unr) h += '<button class="primary" id="goRate" style="margin-top:18px">Rate ' + unr + ' item' + (unr>1?'s':'') + '</button>';
+  }
+  return h;
+}
+
+/* rate */
+function rateQueue(m){
+  var open = m.items.filter(function(i){return i.status!=="done";});
+  return rateAll ? open : open.filter(function(i){return !isRated(i) || i._editing;});
+}
+function rateView(m){
+  var q = rateQueue(m);
+  var open = m.items.filter(function(i){return i.status!=="done";});
+  if(!open.length) return '<div class="empty"><h3>Nothing to rate yet</h3><p>Capture a few items first.</p><button class="ghost" data-go="capture">Go to capture</button></div>';
+  if(!q.length || rateIndex >= q.length){
+    q.forEach(function(i){ delete i._editing; });
+    return '<div class="empty"><h3>All rated</h3><p>Your vital few are ready.</p><button class="primary" data-go="focus" style="margin:10px 0">See your 20%</button><button class="ghost" id="rerate" style="width:100%">Re-rate everything</button></div>';
+  }
+  var it = q[rateIndex];
+  var pips = q.map(function(_,i){return '<i class="'+(i<=rateIndex?'on':'')+'"></i>';}).join("");
+  function dots(kind, val){
+    var L = kind==="impact" ? IMPACT_L : EFFORT_L;
+    return '<div class="dots '+kind+'" role="group" aria-label="'+kind+'">' + [1,2,3,4,5].map(function(n){
+      return '<button data-rate="'+kind+'" data-v="'+n+'" aria-pressed="'+(val===n)+'"><span class="dn">'+n+'</span><span class="dl">'+L[n]+'</span></button>';}).join("") + '</div>';
+  }
+  var ratedOpen = open.filter(isRated), topCount = ratedOpen.filter(function(i){return i.impact>=4 && i!==it;}).length;
+  var crowded = ratedOpen.length >= 4 && topCount/ratedOpen.length > 0.3;
+  return '<div class="rhead"><h2 style="font-size:20px">Rate</h2><span class="tiny">' + (rateIndex+1) + ' of ' + q.length + '</span></div>' +
+    '<div class="pips" aria-hidden="true">'+pips+'</div>' +
+    '<article class="rcard"><span class="chip '+it.type+'">'+it.type+'</span><p class="q">'+esc(it.text)+'</p>' +
+    '<div class="scale"><div class="h">How much does this move the mission? <em>each step doubles</em></div>' + dots("impact", it.impact) + '</div>' +
+    '<div class="scale"><div class="h">How much effort?</div>' + dots("effort", it.effort) + '</div>' +
+    '<button class="toggle" id="blk" aria-pressed="'+(!!it.blocker)+'"><span class="box">✓</span><span><b style="font-weight:600">Blocks other items</b><br><span class="tiny">Others can\'t move until this is solved</span></span></button>' +
+    '<div class="err" id="rErr" style="margin:10px 0 0"></div>' +
+    '<div class="rnav"><button class="ghost" id="rBack">' + (rateIndex? 'Back':'Skip') + '</button><button class="primary" id="rNext">' + (rateIndex===q.length-1?'Finish':'Next') + '</button></div></article>' +
+    (crowded ? '<div class="note" style="margin-top:14px">' + topCount + ' of ' + ratedOpen.length + ' rated items are Critical or Decisive. If everything is critical, nothing is. Save those for items the mission truly can\'t succeed without.</div>'
+             : '<p class="tiny" style="margin-top:14px">Decisive counts 16× Minor. Most items should land on Minor or Helps.</p>');
+}
+
+/* focus */
+function chart(a){
+  var r = a.rated; if(!r.length) return "";
+  var n = r.length, bw = 22, gap = 6, padL = 8, padR = 34, top = 18, h = 150;
+  var W = Math.max(320, padL + n*(bw+gap) + padR);
+  var maxW = Math.max.apply(null, r.map(weight));
+  var s = '<svg viewBox="0 0 '+W+' '+(h+34)+'" width="'+W+'" height="'+(h+34)+'" role="img" aria-label="Pareto chart: '+a.vital.length+' of '+n+' items cover '+Math.round(a.coverage*100)+'% of impact">';
+  var y80 = top + h*(1-0.8);
+  if(a.vital.length){
+    var vx = padL + a.vital.length*(bw+gap) - gap/2 + 2;
+    s += '<rect x="0" y="'+top+'" width="'+vx+'" height="'+h+'" fill="var(--hi-soft)" rx="6"/>';
+    s += '<text x="6" y="'+(top+h+22)+'" font-size="12" font-weight="600" fill="var(--ink)" font-family="Figtree,sans-serif">Path to 80%</text>';
+    s += '<text x="'+(vx+6)+'" y="'+(top+h+22)+'" font-size="12" fill="var(--ink-3)" font-family="Figtree,sans-serif">Trivial many</text>';
+  }
+  s += '<line x1="0" x2="'+(W-padR+4)+'" y1="'+y80+'" y2="'+y80+'" stroke="var(--ink-3)" stroke-dasharray="4 4" stroke-width="1"/>';
+  s += '<text x="'+(W-padR+8)+'" y="'+(y80+4)+'" font-size="12" fill="var(--ink-2)" font-family="Figtree,sans-serif">80%</text>';
+  r.forEach(function(it,i){
+    var x = padL + i*(bw+gap), bh = Math.max(4, (weight(it)/maxW)*h*0.85);
+    var vital = i < a.vital.length;
+    s += '<rect x="'+x+'" y="'+(top+h-bh)+'" width="'+bw+'" height="'+bh+'" rx="4" fill="'+(vital?'var(--hi)':'var(--line)')+'"><title>'+esc(it.text)+'</title></rect>';
+  });
+  var pts = r.map(function(_,i){ return (padL + i*(bw+gap) + bw/2) + ',' + (top + h*(1-a.cum[i])); }).join(" ");
+  s += '<polyline points="'+pts+'" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/>';
+  r.forEach(function(_,i){ s += '<circle cx="'+(padL + i*(bw+gap) + bw/2)+'" cy="'+(top + h*(1-a.cum[i]))+'" r="2.5" fill="var(--ink)"/>'; });
+  s += '</svg>';
+  return '<div class="chartwrap">'+s+'<div class="legend"><span><i style="background:var(--hi)"></i>On the path to 80%</span><span><i style="background:var(--line)"></i>Rest</span><span><i style="background:var(--ink);height:2px;vertical-align:3px"></i>Cumulative impact</span></div></div>';
+}
+function reason(it){
+  var r = [];
+  if(it.impact>=4) r.push(IMPACT_L[it.impact].toLowerCase());
+  if(it.effort<=2) r.push("quick to do");
+  if(it.blocker) r.push("unblocks others");
+  if(it.type==="question" && it.impact>=3) r.push("answer shapes the plan");
+  return r.length ? r.join(", ") : "best ratio of impact to effort";
+}
+function focusView(m,a){
+  if(!a.rated.length){
+    return '<div class="empty"><h3>Rate a few items to see your 20%</h3><p>' + (a.unrated.length ? a.unrated.length + ' items are waiting.' : 'Start by capturing what\'s on your mind.') + '</p>' +
+      '<button class="primary" data-go="' + (a.unrated.length?'rate':'capture') + '" style="margin-top:8px">' + (a.unrated.length?'Rate items':'Capture items') + '</button></div>';
+  }
+  var cov = Math.round(a.coverage*100), n = a.rated.length, v = a.vital.length, share = Math.round(v/n*100);
+  var h = '<div class="verdict"><div class="big"><mark>' + v + ' of ' + n + '</mark> items get you to ' + cov + '% of the outcome.</div>' +
+    '<p class="muted small" style="margin:6px 0 0">That\'s ' + share + '% of your work. Do them in this order; the rest can wait, be delegated, or be dropped.</p></div>';
+  h += chart(a);
+  if(n >= 5 && share > 40) h += '<div class="note">Reaching 80% takes ' + share + '% of your items, so your ratings are fairly even. Either this mission really needs broad effort, or some items are rated higher than they deserve. <button class="ghost" id="rerate2" style="padding:4px 10px;margin-left:4px">Re-rate</button></div>';
+  if(a.unrated.length) h += '<div class="note">' + a.unrated.length + ' item' + (a.unrated.length>1?'s aren\'t':' isn\'t') + ' rated yet and ' + (a.unrated.length>1?'aren\'t':'isn\'t') + ' counted. <button class="ghost" data-go="rate" style="padding:4px 10px;margin-left:4px">Rate now</button></div>';
+  h += '<h3 class="sect">Work sequence to 80%</h3><ol class="vital">' + a.vital.map(function(it,i){
+    return '<li><span class="rank">'+(i+1)+'</span><div class="body"><div class="t">'+esc(it.text)+'</div><div class="meta"><span class="chip '+it.type+'">'+it.type+'</span><span class="why">'+reason(it)+'</span></div>' +
+      '<div class="cumbar" aria-label="Reaches '+Math.round(a.cum[i]*100)+'% cumulative"><i style="width:'+Math.round(a.cum[i]*100)+'%"></i><span>'+Math.round(a.cum[i]*100)+'%</span></div></div>' +
+      '<button class="check" data-done="'+it.id+'" aria-label="Mark done">✓</button></li>';
+  }).join("") + '</ol>';
+  if(a.rest.length){
+    h += '<details class="rest"><summary>Later, delegate, or drop (' + a.rest.length + ')</summary><ul class="list">' + a.rest.map(function(it){
+      return '<li class="item"><span class="chip '+it.type+'">'+it.type+'</span><span class="t">'+esc(it.text)+'</span><button class="del" data-del="'+it.id+'" aria-label="Drop item">×</button></li>';
+    }).join("") + '</ul></details>';
+  }
+  if(a.done.length){
+    h += '<details class="rest donelist"><summary>Done (' + a.done.length + ')</summary><ul class="list">' + a.done.map(function(it){
+      return '<li class="item"><span class="t">'+esc(it.text)+'</span><button class="ghost" data-undo="'+it.id+'" style="padding:4px 10px;font-size:13px">Undo</button></li>';
+    }).join("") + '</ul></details>';
+  }
+  return h;
+}
+
+/* ---------- events ---------- */
+function find(m,id){ return m.items.find(function(i){return i.id===id;}); }
+function bind(m){
+  var ob = $("openMissions"); if(ob) ob.onclick = openSheet;
+  document.querySelectorAll("[data-go]").forEach(function(b){ b.onclick=function(){ view=b.dataset.go; rateIndex=0; render(); window.scrollTo(0,0); }; });
+  document.querySelectorAll("[data-del]").forEach(function(b){ b.onclick=function(){
+    var it = find(m,b.dataset.del); m.items = m.items.filter(function(i){return i.id!==b.dataset.del;}); save(); render(); toast("Removed: " + (it?it.text:"").slice(0,30)); }; });
+  document.querySelectorAll("[data-cycle]").forEach(function(b){ b.onclick=function(){
+    var it = find(m,b.dataset.cycle); var order=["task","question","issue"]; it.type = order[(order.indexOf(it.type)+1)%3]; save(); render(); }; });
+  document.querySelectorAll("[data-done]").forEach(function(b){ b.onclick=function(){
+    var it = find(m,b.dataset.done); it.status="done"; it.doneAt=Date.now(); save(); render(); toast("Done. Your 20% just updated."); }; });
+  document.querySelectorAll("[data-undo]").forEach(function(b){ b.onclick=function(){ var it=find(m,b.dataset.undo); it.status="open"; save(); render(); }; });
+
+  var rr2 = $("rerate2"); if(rr2) rr2.onclick=function(){ view="rate"; rateAll=true; rateIndex=0; render(); window.scrollTo(0,0); };
+  var cf = $("capForm");
+  if(cf){
+    var inp = $("capIn");
+    inp.oninput = function(){ $("capErr").textContent=""; };
+    cf.onsubmit = function(e){
+      e.preventDefault();
+      var t = inp.value.trim();
+      if(!t){ $("capErr").textContent = "Type something to add."; inp.focus(); return; }
+      m.items.push({ id: uid(), text: t, type: captureType, impact: 0, effort: 0, blocker: false, status: "open", created: Date.now() });
+      save(); render(); $("capIn").focus();
+    };
+    document.querySelectorAll("[data-type]").forEach(function(b){ b.onclick=function(){ captureType=b.dataset.type; render(); $("capIn").focus(); }; });
+    var gr = $("goRate"); if(gr) gr.onclick=function(){ view="rate"; rateIndex=0; render(); window.scrollTo(0,0); };
+    var ai = $("aiBtn"); if(ai) ai.onclick = function(){ suggest(m, ai); };
+  }
+
+  var rn = $("rNext");
+  if(view==="rate"){
+    var rr = $("rerate"); if(rr) rr.onclick=function(){ rateAll=true; rateIndex=0; render(); };
+    if(rn){
+      var q = rateQueue(m), it = q[rateIndex];
+      it._editing = true;
+      document.querySelectorAll("[data-rate]").forEach(function(b){ b.onclick=function(){
+        it[b.dataset.rate] = +b.dataset.v; save();
+        b.parentNode.querySelectorAll("button").forEach(function(x){ x.setAttribute("aria-pressed", x===b); });
+        $("rErr").textContent="";
+        if(it.impact && it.effort && b.dataset.rate==="effort"){ /* both set: small nudge */ rn.focus(); }
+      }; });
+      $("blk").onclick=function(){ it.blocker=!it.blocker; this.setAttribute("aria-pressed", it.blocker); save(); };
+      rn.onclick=function(){
+        if(!it.impact || !it.effort){ $("rErr").textContent = "Pick both impact and effort, or tap Skip."; return; }
+        rateIndex++; render(); window.scrollTo(0,0);
+      };
+      $("rBack").onclick=function(){
+        if(rateIndex===0){ delete it._editing; var qq = rateQueue(m); if(qq.length<=1){ rateIndex=qq.length; } else { m.items.splice(m.items.indexOf(it),1); m.items.push(it); } render(); return; }
+        rateIndex--; render();
+      };
+    }
+  }
+}
+
+async function suggest(m, btn){
+  var box = $("sugg");
+  if(!navigator.onLine){ box.innerHTML = '<span class="tiny">You\'re offline. Suggestions need an internet connection.</span>'; return; }
+  btn.disabled = true; btn.textContent = "Thinking…";
+  var payload = {
+    deviceId: deviceId(),
+    mission: { title: m.title, finish: m.finish || "" },
+    items: m.items.slice(-60).map(function(i){ return { text: i.text, type: i.type }; })
+  };
+  try{
+    var r = await fetch("/api/suggest", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+    var data = {};
+    try{ data = await r.json(); }catch(e){}
+    if(r.status === 429){ box.innerHTML = '<span class="tiny">' + esc(data.error || "You've used today's free suggestions. Try again tomorrow.") + '</span>'; }
+    else if(r.status === 501 || r.status === 404){ aiEnabled = false; render(); return; }
+    else if(!r.ok){ box.innerHTML = '<span class="tiny">Couldn\'t get suggestions right now. Try again in a moment.</span>'; }
+    else {
+      var items = (data.items || []).filter(function(x){ return x && x.text; }).slice(0,6);
+      if(!items.length){ box.innerHTML = '<span class="tiny">No new suggestions. Your list looks complete.</span>'; }
+      else {
+        var left = (typeof data.remaining === "number") ? '<span class="tiny" style="width:100%">' + data.remaining + ' suggestion' + (data.remaining===1?'':'s') + ' left today</span>' : '';
+        box.innerHTML = '<span class="tiny" style="width:100%">Tap to add:</span>' + items.map(function(x,i){
+          var t = ["task","question","issue"].indexOf(x.type)>=0 ? x.type : "task";
+          return '<button data-s="'+i+'" data-t="'+t+'"><span class="chip '+t+'">'+t+'</span> '+esc(x.text)+'</button>'; }).join("") + left;
+        box.querySelectorAll("[data-s]").forEach(function(b){ b.onclick=function(){
+          var x = items[+b.dataset.s];
+          m.items.push({ id: uid(), text: String(x.text).slice(0,160), type: b.dataset.t, impact:0, effort:0, blocker:false, status:"open", created: Date.now() });
+          save(); b.remove(); renderTabs(m); toast("Added");
+          if(!document.querySelector(".list")) render();
+        }; });
+      }
+    }
+  }catch(e){
+    box.innerHTML = '<span class="tiny">Couldn\'t reach the server. Check your connection and try again.</span>';
+  }
+  btn.disabled = false; btn.textContent = "Suggest items I might be missing";
+}
+
+/* missions sheet */
+function openSheet(){
+  var b = $("sheetBody");
+  b.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h2 style="font-size:22px">Your missions</h2><button class="iconbtn" id="closeS">Close</button></div>' +
+    state.missions.map(function(m){
+      return '<div class="mrow"><button class="pick" data-pick="'+m.id+'"><b style="font-weight:600">'+esc(m.title)+'</b>'+(m.id===state.current?'<span class="cur">current</span>':'')+'<br><span class="tiny">'+m.items.length+' items</span></button>' +
+        '<button class="iconbtn" data-rm="'+m.id+'">Delete</button></div>';
+    }).join("") +
+    '<div style="margin-top:20px">' + newMissionForm(false) + '</div>' +
+    '<div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--line)"><h3 style="font-size:16px;margin-bottom:4px">Backup</h3>' +
+    '<p class="tiny" style="margin:0 0 10px">Your missions are stored only on this device. Save a backup file to move them to another phone or keep them safe.</p>' +
+    '<div style="display:flex;gap:8px"><button class="ghost" id="exportB" style="flex:1">Save backup</button><button class="ghost" id="importB" style="flex:1">Restore backup</button></div>' +
+    '<input type="file" id="importF" accept="application/json,.json" hidden><div class="err" id="bErr" style="margin:8px 0 0"></div></div>';
+  $("sheet").classList.add("open");
+  $("closeS").onclick = closeSheet;
+  b.querySelectorAll("[data-pick]").forEach(function(x){ x.onclick=function(){ state.current=x.dataset.pick; view="focus"; save(); closeSheet(); render(); }; });
+  b.querySelectorAll("[data-rm]").forEach(function(x){ x.onclick=function(){
+    if(x.dataset.confirm!=="1"){ x.dataset.confirm="1"; x.textContent="Confirm"; return; }
+    state.missions = state.missions.filter(function(m){return m.id!==x.dataset.rm;});
+    if(state.current===x.dataset.rm) state.current = state.missions.length ? state.missions[0].id : null;
+    save(); if(state.missions.length) openSheet(); else { closeSheet(); } render();
+  }; });
+  $("exportB").onclick = function(){
+    var blob = new Blob([JSON.stringify({ app: "vital-few", version: 1, exported: new Date().toISOString(), data: state }, null, 2)], { type: "application/json" });
+    var a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+    a.download = "vital-few-backup-" + new Date().toISOString().slice(0,10) + ".json";
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+    toast("Backup saved");
+  };
+  $("importB").onclick = function(){ $("importF").click(); };
+  $("importF").onchange = function(){
+    var f = this.files && this.files[0]; if(!f) return;
+    var rd = new FileReader();
+    rd.onload = function(){
+      try{
+        var j = JSON.parse(rd.result); var d = j && j.data;
+        if(!d || !Array.isArray(d.missions)) throw 0;
+        var have = {}; state.missions.forEach(function(m){ have[m.id]=1; });
+        var added = 0; d.missions.forEach(function(m){ if(m && m.id && !have[m.id] && Array.isArray(m.items)){ state.missions.push(m); added++; } });
+        if(!state.current && state.missions.length) state.current = state.missions[0].id;
+        save(); render(); openSheet(); toast(added ? "Restored " + added + " mission" + (added>1?"s":"") : "Those missions are already here");
+      }catch(e){ $("bErr").textContent = "That file isn't a Vital Few backup. Choose the .json file you saved."; }
+    };
+    rd.readAsText(f);
+  };
+  bindNewMission();
+}
+function closeSheet(){ $("sheet").classList.remove("open"); }
+$("sheet").addEventListener("click", function(e){ if(e.target.id==="sheet") closeSheet(); });
+document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeSheet(); });
+
+loadLocal();
+if(state.current && !mission()) state.current = state.missions.length ? state.missions[0].id : null;
+render();
+if("serviceWorker" in navigator){ window.addEventListener("load", function(){ navigator.serviceWorker.register("/sw.js").catch(function(){}); }); }
+})();
+</script>
+</body>
+</html>

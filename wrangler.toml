@@ -1,0 +1,10 @@
+# Used only for running locally with `npx wrangler pages dev public`.
+# On Cloudflare, settings come from the dashboard (see README).
+name = "vital-few"
+pages_build_output_dir = "public"
+compatibility_date = "2026-09-01"
+
+# To test rate limits locally, create a KV namespace and uncomment:
+# [[kv_namespaces]]
+# binding = "RATE_LIMIT"
+# id = "your-namespace-id"
